@@ -1,0 +1,8 @@
+/.build/
+.dart_tool/
+.packages
+.idea/
+.vscode/
+.flutter-plugins
+.gradle/
+build/
