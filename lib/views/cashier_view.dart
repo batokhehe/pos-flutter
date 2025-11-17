@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mvvm_flutter_boilerplate/viewmodels/transaction_viewmodel.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/product_viewmodel.dart';
 import '../domain/entities/product.dart';
@@ -64,76 +65,78 @@ class _CashierViewState extends State<CashierView> {
               child: vm.products.isEmpty
                   ? const Center(child: Text('No products available'))
                   : GridView.builder(
-                gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: vm.products.length,
-                itemBuilder: (context, index) {
-                  final p = vm.products[index];
-                  final image =
-                      'https://source.unsplash.com/400x300/?food,meal,${p.name}';
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => _addToCart(p),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Image.network(
-                              image,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.fastfood, size: 40),
-                              ),
-                            ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        childAspectRatio: 0.8,
+                      ),
+                      itemCount: vm.products.length,
+                      itemBuilder: (context, index) {
+                        final p = vm.products[index];
+                        final image =
+                            'https://source.unsplash.com/400x300/?food,meal,${p.name}';
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(8),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            onTap: () => _addToCart(p),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  p.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                Expanded(
+                                  child: Image.network(
+                                    image,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: Colors.grey[300],
+                                      child:
+                                          const Icon(Icons.fastfood, size: 40),
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '\$${p.price.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                      color: Colors.orange),
-                                ),
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.add_circle,
-                                        color: Colors.green),
-                                    onPressed: () => _addToCart(p),
+                                Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        p.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '\$${p.price.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                            color: Colors.orange),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: IconButton(
+                                          icon: const Icon(Icons.add_circle,
+                                              color: Colors.green),
+                                          onPressed: () => _addToCart(p),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
 
@@ -160,31 +163,31 @@ class _CashierViewState extends State<CashierView> {
                     child: _cart.isEmpty
                         ? const Center(child: Text('No items yet'))
                         : ListView(
-                      children: _cart.entries.map((entry) {
-                        final p = entry.key;
-                        final qty = entry.value;
-                        return ListTile(
-                          title: Text(p.name),
-                          subtitle: Text(
-                              '${qty}x  @ \$${p.price.toStringAsFixed(2)}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.remove_circle,
-                                    color: Colors.red),
-                                onPressed: () => _removeFromCart(p),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.add_circle,
-                                    color: Colors.green),
-                                onPressed: () => _addToCart(p),
-                              ),
-                            ],
+                            children: _cart.entries.map((entry) {
+                              final p = entry.key;
+                              final qty = entry.value;
+                              return ListTile(
+                                title: Text(p.name),
+                                subtitle: Text(
+                                    '${qty}x  @ \$${p.price.toStringAsFixed(2)}'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.remove_circle,
+                                          color: Colors.red),
+                                      onPressed: () => _removeFromCart(p),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.add_circle,
+                                          color: Colors.green),
+                                      onPressed: () => _addToCart(p),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
-                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -202,13 +205,28 @@ class _CashierViewState extends State<CashierView> {
                         ElevatedButton.icon(
                           onPressed: _cart.isEmpty
                               ? null
-                              : () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Checkout successful!')),
-                            );
-                            setState(() => _cart.clear());
-                          },
+                              : () async {
+                                  final txItems = _cart.entries
+                                      .map((e) => {
+                                            'productId': e.key.id,
+                                            'name': e.key.name,
+                                            'quantity': e.value,
+                                            'price': e.key.price,
+                                          })
+                                      .toList();
+
+                                  await context
+                                      .read<TransactionViewModel>()
+                                      .addTransaction(_totalPrice, txItems);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            '✅ Checkout tersimpan ke database!')),
+                                  );
+
+                                  setState(() => _cart.clear());
+                                },
                           icon: const Icon(Icons.payment),
                           label: const Text('Checkout'),
                           style: ElevatedButton.styleFrom(

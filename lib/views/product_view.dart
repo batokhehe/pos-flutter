@@ -157,54 +157,81 @@ class _ProductViewState extends State<ProductView> {
   ) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
+        return Dialog(
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text(id != null ? "Edit Product" : "Add Product"),
-          content: SingleChildScrollView(
+          child: SingleChildScrollView(
+            // ✅ Biar bisa di-scroll saat keyboard muncul
+            padding: EdgeInsets.only(
+              top: 20,
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom +
+                  20, // ✅ Tambah padding sesuai tinggi keyboard
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Text(
+                  id != null ? "Edit Product" : "Add Product",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 TextField(
                   controller: nameCtrl,
                   decoration: const InputDecoration(labelText: 'Name'),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 TextField(
                   controller: priceCtrl,
                   decoration: const InputDecoration(labelText: 'Price'),
                   keyboardType: TextInputType.number,
                 ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final name = nameCtrl.text.trim();
+                        final price =
+                            double.tryParse(priceCtrl.text.trim()) ?? 0.0;
+
+                        if (name.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Please enter a product name')),
+                          );
+                          return;
+                        }
+
+                        if (id == null) {
+                          await vm.addProduct(name, price);
+                        } else {
+                          await vm.updateProduct(id, name, price);
+                        }
+
+                        if (context.mounted) Navigator.pop(context);
+                      },
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final name = nameCtrl.text.trim();
-                final price = double.tryParse(priceCtrl.text.trim()) ?? 0.0;
-                if (name.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Please enter a product name')),
-                  );
-                  return;
-                }
-                if (id == null) {
-                  await vm.addProduct(name, price);
-                } else {
-                  await vm.updateProduct(id, name, price);
-                }
-                if (context.mounted) Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
         );
       },
     );

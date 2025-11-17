@@ -1,12 +1,24 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:mvvm_flutter_boilerplate/views/widgets/home_view_body.dart';
+import 'package:provider/provider.dart';
+
+import '../data/models/transaction_with_items.dart';
+import '../viewmodels/transaction_viewmodel.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Welcome to Home Page!', style: TextStyle(fontSize: 18)),
+    final vm = context.watch<TransactionViewModel>();
+
+    return StreamBuilder<List<TransactionWithItems>>(
+      stream: vm.transactions,
+      builder: (context, snapshot) {
+        final data = snapshot.data ?? [];
+
+        return HomeViewBody(transactions: data);
+      },
     );
   }
 }

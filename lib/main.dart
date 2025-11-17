@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mvvm_flutter_boilerplate/viewmodels/product_viewmodel.dart';
+import 'package:mvvm_flutter_boilerplate/viewmodels/transaction_viewmodel.dart';
 import 'package:mvvm_flutter_boilerplate/views/product_view.dart';
 import 'package:provider/provider.dart';
+
 import 'locator.dart';
 import 'viewmodels/auth_viewmodel.dart';
-import 'views/login_view.dart';
 import 'views/dashboard_view.dart';
-import 'package:flutter/services.dart';
-
+import 'views/login_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +28,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider<AuthViewModel>.value(value: authVM),
         ChangeNotifierProvider(create: (_) => locator<ProductViewModel>()),
+        ChangeNotifierProvider(create: (_) => locator<TransactionViewModel>()),
       ],
       child: const MyApp(),
     ),
@@ -46,7 +48,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',
       routes: {
-        '/': (_) => authVM.isLoggedIn ? const DashboardView() : const LoginView(),
+        '/': (_) =>
+            authVM.isLoggedIn ? const DashboardView() : const LoginView(),
         '/users': (_) => const DashboardView(),
         '/products': (_) => const ProductView(),
       },

@@ -1,5 +1,8 @@
 import 'package:get_it/get_it.dart';
+import 'package:mvvm_flutter_boilerplate/data/repositories/transaction_repository.dart';
+import 'package:mvvm_flutter_boilerplate/domain/daos/transaction_dao.dart';
 import 'package:mvvm_flutter_boilerplate/viewmodels/product_viewmodel.dart';
+import 'package:mvvm_flutter_boilerplate/viewmodels/transaction_viewmodel.dart';
 
 import 'core/db/app_database.dart';
 import 'core/network/api_client.dart';
@@ -17,4 +20,9 @@ void setupLocator() {
   locator.registerLazySingleton(() => AppDatabase());
   locator.registerLazySingleton(() => ProductRepository(locator()));
   locator.registerFactory(() => ProductViewModel(locator<ProductRepository>()));
+
+  locator.registerLazySingleton(() => TransactionDao(locator()));
+  locator.registerLazySingleton(() => TransactionRepository(locator()));
+  locator.registerFactory(
+      () => TransactionViewModel(locator<TransactionRepository>()));
 }
