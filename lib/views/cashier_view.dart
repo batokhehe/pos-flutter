@@ -70,7 +70,7 @@ class _CashierViewState extends State<CashierView> {
                         crossAxisCount: 3,
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 0.8,
+                        childAspectRatio: 0.75, // Fix
                       ),
                       itemCount: vm.products.length,
                       itemBuilder: (context, index) {
@@ -82,15 +82,18 @@ class _CashierViewState extends State<CashierView> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           clipBehavior: Clip.antiAlias,
+                          elevation: 2,
                           child: InkWell(
                             onTap: () => _addToCart(p),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
+                                // ==== GAMBAR ====
+                                SizedBox(
+                                  height: 110, // Tinggi gambar lebih stabil
+                                  width: double.infinity,
                                   child: Image.network(
                                     image,
-                                    width: double.infinity,
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) => Container(
                                       color: Colors.grey[300],
@@ -99,6 +102,8 @@ class _CashierViewState extends State<CashierView> {
                                     ),
                                   ),
                                 ),
+
+                                // ==== TEXT AREA ====
                                 Padding(
                                   padding: const EdgeInsets.all(8),
                                   child: Column(
@@ -120,15 +125,17 @@ class _CashierViewState extends State<CashierView> {
                                         style: const TextStyle(
                                             color: Colors.orange),
                                       ),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: IconButton(
-                                          icon: const Icon(Icons.add_circle,
-                                              color: Colors.green),
-                                          onPressed: () => _addToCart(p),
-                                        ),
-                                      ),
                                     ],
+                                  ),
+                                ),
+
+                                // ==== ADD BUTTON ====
+                                Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.add_circle,
+                                        color: Colors.green),
+                                    onPressed: () => _addToCart(p),
                                   ),
                                 ),
                               ],

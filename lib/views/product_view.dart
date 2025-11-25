@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/product_viewmodel.dart';
-import '../domain/entities/product.dart';
 
 class ProductView extends StatefulWidget {
   const ProductView({super.key});
@@ -27,10 +26,6 @@ class _ProductViewState extends State<ProductView> {
     final priceCtrl = TextEditingController();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Product'),
-        backgroundColor: Colors.orange,
-      ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: vm.products.isEmpty
@@ -43,10 +38,10 @@ class _ProductViewState extends State<ProductView> {
               )
             : GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5, // ✅ fix 5 kolom
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  childAspectRatio: 0.7, // proporsi tinggi vs lebar
+                  crossAxisCount: 5,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.72, // agar proporsional dengan card baru
                 ),
                 itemCount: vm.products.length,
                 itemBuilder: (context, index) {
@@ -59,26 +54,24 @@ class _ProductViewState extends State<ProductView> {
                       nameCtrl.text = p.name;
                       priceCtrl.text = p.price.toString();
                       _showProductDialog(
-                        context,
-                        vm,
-                        nameCtrl,
-                        priceCtrl,
-                        p.id,
-                      );
+                          context, vm, nameCtrl, priceCtrl, p.id);
                     },
                     child: Card(
-                      elevation: 3,
+                      elevation: 5,
+                      shadowColor: Colors.black12,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       clipBehavior: Clip.antiAlias,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
+                          // ==== IMAGE ====
+                          SizedBox(
+                            height: 130,
+                            width: double.infinity,
                             child: Image.network(
                               dummyImage,
-                              width: double.infinity,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Container(
                                 color: Colors.grey[300],
@@ -90,41 +83,59 @@ class _ProductViewState extends State<ProductView> {
                               ),
                             ),
                           ),
+
+                          // ==== TEXT ====
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 6),
+                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   p.name,
                                   style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
                                 Text(
                                   '\$${p.price.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     color: Colors.orange,
-                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                                size: 20,
+
+                          const Spacer(),
+
+                          // ==== DELETE BUTTON ====
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(right: 10, bottom: 8),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(50),
+                                onTap: () => vm.deleteProduct(p.id!),
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFFFECEC),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                    size: 20,
+                                  ),
+                                ),
                               ),
-                              onPressed: () => vm.deleteProduct(p.id!),
                             ),
                           ),
                         ],
