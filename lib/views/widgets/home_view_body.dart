@@ -9,19 +9,27 @@ class HomeViewBody extends StatefulWidget {
   final List<TransactionWithItems> transactions;
   final List<Product> products;
 
-  const HomeViewBody(
-      {super.key, required this.transactions, required this.products});
+  const HomeViewBody({
+    super.key,
+    required this.transactions,
+    required this.products,
+  });
 
   @override
   State<HomeViewBody> createState() => _HomeViewBodyState();
 }
 
 class _HomeViewBodyState extends State<HomeViewBody> {
-  String filter = "Daily"; // Daily, Weekly, Monthly
+  String filter = "Daily"; // Daily, Weekly, Monthly, Custom
+  DateTimeRange? customRange;
 
-  // === FILTER LOGIC ===
+  // ===========================
+  //       FILTER LOGIC
+  // ===========================
+
   List<TransactionWithItems> get filteredTx {
     final now = DateTime.now();
+
     return widget.transactions.where((tx) {
       final d = tx.transaction.date;
 
@@ -39,6 +47,12 @@ class _HomeViewBodyState extends State<HomeViewBody> {
         return d.year == now.year && d.month == now.month;
       }
 
+      if (filter == "Custom" && customRange != null) {
+        return d.isAfter(
+                customRange!.start.subtract(const Duration(seconds: 1))) &&
+            d.isBefore(customRange!.end.add(const Duration(seconds: 1)));
+      }
+
       return true;
     }).toList();
   }
@@ -48,8 +62,11 @@ class _HomeViewBodyState extends State<HomeViewBody> {
 
   @override
   Widget build(BuildContext context) {
-    final money =
-        NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0);
+    final money = NumberFormat.currency(
+      locale: "id_ID",
+      symbol: "Rp ",
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
@@ -58,7 +75,9 @@ class _HomeViewBodyState extends State<HomeViewBody> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ================== FILTER BUTTONS ==================
+            // ==================
+            // FILTER BUTTONS
+            // ==================
             Row(
               children: [
                 _buildFilter("Daily", "Harian"),
@@ -66,12 +85,16 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                 _buildFilter("Weekly", "Mingguan"),
                 const SizedBox(width: 8),
                 _buildFilter("Monthly", "Bulanan"),
+                const SizedBox(width: 8),
+                _buildCustomFilter(),
               ],
             ),
 
             const SizedBox(height: 20),
 
-            // ================== SUMMARY CARDS ==================
+            // ==================
+            // SUMMARY CARDS
+            // ==================
             Wrap(
               spacing: 20,
               runSpacing: 20,
@@ -107,7 +130,9 @@ class _HomeViewBodyState extends State<HomeViewBody> {
 
             const SizedBox(height: 25),
 
-            // ================== CHART AREA ==================
+            // ==================
+            // CHART
+            // ==================
             Container(
               padding: const EdgeInsets.all(20),
               width: double.infinity,
@@ -117,23 +142,19 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                 children: [
                   const Text(
                     "Grafik Penjualan",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 15),
-                  SizedBox(
-                    height: 250,
-                    child: _buildSalesChart(),
-                  ),
+                  SizedBox(height: 250, child: _buildSalesChart()),
                 ],
               ),
             ),
 
             const SizedBox(height: 25),
 
-            // ================== TOP PRODUCTS ==================
+            // ==================
+            // TOP PRODUCTS
+            // ==================
             Container(
               padding: const EdgeInsets.all(16),
               width: double.infinity,
@@ -143,10 +164,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                 children: [
                   const Text(
                     "Produk Terlaris",
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   ..._topProducts().map((e) {
@@ -167,6 +185,28 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                 ],
               ),
             ),
+
+            const SizedBox(height: 25),
+
+            // ==================
+            // HISTORY GROUPED BY DATE
+            // ==================
+            Container(
+              padding: const EdgeInsets.all(16),
+              width: double.infinity,
+              decoration: _boxStyle(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Riwayat Transaksi",
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildHistoryList(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -174,7 +214,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
   }
 
   // ===========================
-  //          COMPONENTS
+  //  COMPONENTS
   // ===========================
 
   Widget _buildFilter(String key, String label) {
@@ -200,6 +240,47 @@ class _HomeViewBodyState extends State<HomeViewBody> {
     );
   }
 
+  Widget _buildCustomFilter() {
+    final bool active = filter == "Custom";
+
+    return GestureDetector(
+      onTap: () async {
+        final picked = await showDateRangePicker(
+          context: context,
+          firstDate: DateTime(2023),
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+          initialDateRange: customRange ??
+              DateTimeRange(
+                start: DateTime.now().subtract(const Duration(days: 7)),
+                end: DateTime.now(),
+              ),
+        );
+
+        if (picked != null) {
+          setState(() {
+            filter = "Custom";
+            customRange = picked;
+          });
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: active ? Colors.orange : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.orange),
+        ),
+        child: Text(
+          "Custom",
+          style: TextStyle(
+            color: active ? Colors.white : Colors.orange,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _summaryCard(String title, String value, IconData icon, Color color) {
     return Container(
       width: 220,
@@ -210,9 +291,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
+                color: color.withOpacity(0.15), shape: BoxShape.circle),
             child: Icon(icon, color: color),
           ),
           const SizedBox(width: 14),
@@ -223,11 +302,9 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                   style: const TextStyle(
                       fontSize: 14, fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(
-                value,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           )
         ],
@@ -269,7 +346,6 @@ class _HomeViewBodyState extends State<HomeViewBody> {
       for (var item in t.items) {
         final id = item.productId;
 
-        // cari nama produk berdasarkan ID
         final product = widget.products.firstWhere(
           (p) => p.id == id,
           orElse: () => Product(id: id, name: "Unknown", price: 0),
@@ -277,7 +353,7 @@ class _HomeViewBodyState extends State<HomeViewBody> {
 
         if (!map.containsKey(id)) {
           map[id] = {
-            "name": product.name, // ← NAMA PRODUK ASLI
+            "name": product.name,
             "qty": item.quantity,
             "total": item.price * item.quantity,
           };
@@ -288,43 +364,118 @@ class _HomeViewBodyState extends State<HomeViewBody> {
       }
     }
 
-    final list = map.values.toList();
-    list.sort((a, b) => b["qty"].compareTo(a["qty"]));
+    final list = map.values.toList()
+      ..sort((a, b) => b["qty"].compareTo(a["qty"]));
 
     return list.take(5).toList();
   }
 
+  // ===========================
+  //       GROUPED HISTORY
+  // ===========================
+
+  Map<String, List<TransactionWithItems>> _groupByDate() {
+    final Map<String, List<TransactionWithItems>> grouped = {};
+
+    for (var tx in filteredTx) {
+      final key = DateFormat("dd MMM yyyy").format(tx.transaction.date);
+
+      if (!grouped.containsKey(key)) {
+        grouped[key] = [];
+      }
+
+      grouped[key]!.add(tx);
+    }
+
+    return grouped;
+  }
+
+  Widget _buildHistoryList() {
+    final grouped = _groupByDate();
+
+    if (grouped.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.all(12),
+        child: Text("Tidak ada riwayat transaksi"),
+      );
+    }
+
+    return Column(
+      children: grouped.entries.map((entry) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: _boxStyle(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                entry.key,
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              ...entry.value.map((tx) {
+                return ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.receipt_long, color: Colors.orange),
+                  title: Text("Transaksi #${tx.transaction.id}"),
+                  subtitle: Text(
+                    "Total: Rp ${NumberFormat('#,###', 'id_ID').format(tx.transaction.total)}",
+                  ),
+                  trailing: Text(
+                    DateFormat("HH:mm").format(tx.transaction.date),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  onTap: () => _showTransactionDetail(tx),
+                );
+              })
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // ===========================
+  //           CHART
+  // ===========================
+
   Widget _buildSalesChart() {
     final dataMap = <int, double>{};
 
-    // ==== PRE-FILL =====
     if (filter == "Monthly") {
-      // isi 1..31 = 0
-      for (int i = 1; i <= 31; i++) {
+      for (int i = 1; i <= 31; i++) dataMap[i] = 0;
+    }
+
+    if (filter == "Custom" && customRange != null) {
+      int days = customRange!.end.difference(customRange!.start).inDays + 1;
+      for (int i = 1; i <= days; i++) {
         dataMap[i] = 0;
       }
     }
 
-    // ===== INPUT DATA TRANSAKSI ====
     for (var tx in filteredTx) {
       final d = tx.transaction.date;
       int key;
 
       if (filter == "Daily") {
-        key = d.hour; // 0–23
+        key = d.hour;
       } else if (filter == "Weekly") {
-        key = d.weekday; // 1–7
+        key = d.weekday;
+      } else if (filter == "Monthly") {
+        key = d.day;
       } else {
-        key = d.day; // 1–31
+        key = d.difference(customRange!.start).inDays + 1;
       }
 
       dataMap[key] = (dataMap[key] ?? 0) + tx.transaction.total;
     }
 
-    // ===== KONVERSI KE FlSpot =====
-    final spots = dataMap.entries.map((e) {
-      return FlSpot(e.key.toDouble(), e.value.toDouble());
-    }).toList()
+    final spots = dataMap.entries
+        .map((e) => FlSpot(e.key.toDouble(), e.value.toDouble()))
+        .toList()
       ..sort((a, b) => a.x.compareTo(b.x));
 
     if (spots.isEmpty) {
@@ -358,7 +509,9 @@ class _HomeViewBodyState extends State<HomeViewBody> {
 
                 if (filter == "Daily") {
                   return Text("$v", style: const TextStyle(fontSize: 10));
-                } else if (filter == "Weekly") {
+                }
+
+                if (filter == "Weekly") {
                   const days = [
                     "",
                     "Sen",
@@ -370,21 +523,124 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                     "Min"
                   ];
                   return Text(days[v], style: const TextStyle(fontSize: 10));
-                } else {
-                  // tampilkan hanya beberapa label biar tidak terlalu padat
+                }
+
+                if (filter == "Monthly") {
                   if (v % 3 == 0) {
-                    return Text(
-                      v.toString(),
-                      style: const TextStyle(fontSize: 10),
-                    );
+                    return Text("$v", style: const TextStyle(fontSize: 10));
                   }
                   return const SizedBox.shrink();
                 }
+
+                if (filter == "Custom") {
+                  final date = customRange!.start.add(Duration(days: v - 1));
+                  return Text(
+                    DateFormat("dd/MM").format(date),
+                    style: const TextStyle(fontSize: 10),
+                  );
+                }
+
+                return const SizedBox();
               },
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showTransactionDetail(TransactionWithItems tx) {
+    final money = NumberFormat.currency(
+      locale: "id_ID",
+      symbol: "Rp ",
+      decimalDigits: 0,
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Text(
+                  "Detail Transaksi #${tx.transaction.id}",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  DateFormat("dd MMM yyyy • HH:mm").format(tx.transaction.date),
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Item",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                ...tx.items.map((item) {
+                  final product = widget.products.firstWhere(
+                    (p) => p.id == item.productId,
+                    orElse: () => Product(id: 0, name: "Unknown", price: 0),
+                  );
+
+                  return ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(product.name),
+                    subtitle: Text(
+                      "${item.quantity} × ${money.format(item.price)}",
+                    ),
+                    trailing: Text(
+                      money.format(item.quantity * item.price),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Total",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      money.format(tx.transaction.total),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

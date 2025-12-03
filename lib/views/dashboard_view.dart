@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mvvm_flutter_boilerplate/views/widgets/sidebar_widget.dart';
 import 'home_view.dart';
-import 'material_view.dart';
+import 'expense_view.dart';
 import 'product_view.dart';
 import 'cashier_view.dart';
 

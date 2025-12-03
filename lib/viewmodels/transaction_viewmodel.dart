@@ -16,4 +16,18 @@ class TransactionViewModel extends ChangeNotifier {
     await _repo.saveTransaction(total, items);
     notifyListeners();
   }
+
+  Future<void> addSingleExpense(String name, int qty, double price) async {
+    final total = qty * price;
+
+    await _repo.addExpense(
+      name: name,
+      qty: qty,
+      price: price,
+      total: total,
+      date: DateTime.now(),
+    );
+
+    loadExpenses();
+  }
 }
