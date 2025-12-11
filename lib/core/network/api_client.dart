@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 class ApiClient {
   final Dio dio = Dio(
@@ -11,7 +12,19 @@ class ApiClient {
         'Content-Type': 'application/json',
       },
     ),
-  );
+  )..interceptors.add(
+      LogInterceptor(
+        request: true,
+        requestBody: true,
+        requestHeader: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        logPrint: (obj) {
+          debugPrint(obj.toString());
+        },
+      ),
+    );
 
   Future<Response> post(String path, Map<String, dynamic> data) async {
     try {

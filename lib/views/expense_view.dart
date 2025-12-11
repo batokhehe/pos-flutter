@@ -26,9 +26,9 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
         child: const Icon(Icons.add),
         onPressed: _openInputSheet,
       ),
-      body: txVm.expenses.isEmpty
-          ? const Center(child: Text("Belum ada pengeluaran"))
-          : _buildExpenseList(txVm),
+      // body: txVm.expenses.isEmpty
+      //     ? const Center(child: Text("Belum ada pengeluaran"))
+      //     : _buildExpenseList(txVm),
     );
   }
 
@@ -176,43 +176,43 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
   // ===============================
   //  GROUPED EXPENSE LIST
   // ===============================
-  Widget _buildExpenseList(TransactionViewModel vm) {
-    final grouped = vm.groupExpenseByDate();
-
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      children: grouped.entries.map((entry) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.only(bottom: 15),
-          child: Padding(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entry.key, // ex: 26 Jan 2025
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                ...entry.value.map((e) {
-                  return ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(e.name),
-                    subtitle: Text("${e.qty} x Rp${e.price}"),
-                    trailing: Text(
-                      "Rp ${e.total}",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  );
-                })
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
+  // Widget _buildExpenseList(TransactionViewModel vm) {
+  //   final grouped = vm.groupExpenseByDate();
+  //
+  //   return ListView(
+  //     padding: const EdgeInsets.all(12),
+  //     children: grouped.entries.map((entry) {
+  //       return Card(
+  //         elevation: 2,
+  //         margin: const EdgeInsets.only(bottom: 15),
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(15),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Text(
+  //                 entry.key, // ex: 26 Jan 2025
+  //                 style: const TextStyle(
+  //                     fontSize: 16, fontWeight: FontWeight.bold),
+  //               ),
+  //               const SizedBox(height: 10),
+  //               ...entry.value.map((e) {
+  //                 return ListTile(
+  //                   dense: true,
+  //                   contentPadding: EdgeInsets.zero,
+  //                   title: Text(e.name),
+  //                   subtitle: Text("${e.qty} x Rp${e.price}"),
+  //                   trailing: Text(
+  //                     "Rp ${e.total}",
+  //                     style: const TextStyle(fontWeight: FontWeight.bold),
+  //                   ),
+  //                 );
+  //               })
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     }).toList(),
+  //   );
+  // }
 }

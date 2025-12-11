@@ -51,10 +51,6 @@ class _CashierViewState extends State<CashierView> {
     final vm = context.watch<ProductViewModel>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cashier'),
-        backgroundColor: Colors.orange,
-      ),
       body: Row(
         children: [
           // === KIRI: Product List ===
