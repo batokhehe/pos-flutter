@@ -9,11 +9,14 @@ class AuthViewModel extends ChangeNotifier {
 
   bool _loading = false;
   String? _token;
+  String? _name;
   String? _error;
 
   bool get loading => _loading;
 
   String? get token => _token;
+
+  String? get name => _name;
 
   String? get error => _error;
 
@@ -27,8 +30,10 @@ class AuthViewModel extends ChangeNotifier {
     try {
       final result = await _repo.login(email, password);
       _token = result.token;
+      _name = result.name;
       if (_token != null) {
         await _cache.saveToken(_token!);
+        await _cache.saveName(_name!);
       }
       return true;
     } catch (e) {
@@ -42,12 +47,15 @@ class AuthViewModel extends ChangeNotifier {
 
   Future<void> loadCachedToken() async {
     _token = await _cache.getToken();
+    _name = await _cache.getName();
     notifyListeners();
   }
 
   Future<void> logout() async {
     await _cache.clearToken();
+    await _cache.clearName();
     _token = null;
+    _name = null;
     notifyListeners();
   }
 

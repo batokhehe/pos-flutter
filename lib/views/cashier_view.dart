@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mvvm_flutter_boilerplate/viewmodels/transaction_viewmodel.dart';
 import 'package:provider/provider.dart';
 import '../../viewmodels/product_viewmodel.dart';
+import '../core/helpers.dart';
 import '../domain/entities/product.dart';
 
 class CashierView extends StatefulWidget {
@@ -66,7 +67,7 @@ class _CashierViewState extends State<CashierView> {
                         crossAxisCount: 3,
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 0.75, // Fix
+                        childAspectRatio: 0.7,
                       ),
                       itemCount: vm.products.length,
                       itemBuilder: (context, index) {
@@ -117,7 +118,7 @@ class _CashierViewState extends State<CashierView> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '\$${p.price.toStringAsFixed(2)}',
+                                        formatCurrency.format(p.price),
                                         style: const TextStyle(
                                             color: Colors.orange),
                                       ),
@@ -159,7 +160,7 @@ class _CashierViewState extends State<CashierView> {
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18),
+                          fontSize: 14),
                     ),
                   ),
                   Expanded(
@@ -172,7 +173,7 @@ class _CashierViewState extends State<CashierView> {
                               return ListTile(
                                 title: Text(p.name),
                                 subtitle: Text(
-                                    '${qty}x  @ \$${p.price.toStringAsFixed(2)}'),
+                                    '${qty}x  @ ${formatCurrency.format(p.price)}'),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -199,7 +200,7 @@ class _CashierViewState extends State<CashierView> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Total: \$${_totalPrice.toStringAsFixed(2)}',
+                          'Total: ${formatCurrency.format(_totalPrice)}',
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                           textAlign: TextAlign.right,
@@ -223,9 +224,22 @@ class _CashierViewState extends State<CashierView> {
                                       .addTransaction(_totalPrice, txItems);
 
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text(
-                                            '✅ Checkout tersimpan ke database!')),
+                                    SnackBar(
+                                      content: const Text(
+                                        'Checkout berhasil!',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      backgroundColor: Colors.green,
+                                      // 🔥 SnackBar hijau
+                                      behavior: SnackBarBehavior.floating,
+                                      // opsional: lebih modern
+                                      margin: const EdgeInsets.all(12),
+                                      // opsional: floating style
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      duration: const Duration(seconds: 2),
+                                    ),
                                   );
 
                                   setState(() => _cart.clear());

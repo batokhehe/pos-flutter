@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mvvm_flutter_boilerplate/core/helpers.dart';
 import 'package:provider/provider.dart';
 
 import '../../viewmodels/product_viewmodel.dart';
@@ -38,10 +39,10 @@ class _ProductViewState extends State<ProductView> {
               )
             : GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 5,
+                  crossAxisCount: 4,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio: 0.72, // agar proporsional dengan card baru
+                  childAspectRatio: 0.72,
                 ),
                 itemCount: vm.products.length,
                 itemBuilder: (context, index) {
@@ -101,7 +102,7 @@ class _ProductViewState extends State<ProductView> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  '\$${p.price.toStringAsFixed(2)}',
+                                  formatCurrency.format(p.price),
                                   style: const TextStyle(
                                     color: Colors.orange,
                                     fontWeight: FontWeight.bold,

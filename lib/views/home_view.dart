@@ -24,7 +24,7 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> _loadInitialData() async {
     final productVm = context.read<ProductViewModel>();
-    await productVm.loadProducts(); // ← panggil sekali saja
+    await productVm.loadProducts();
     setState(() => _isLoadingProducts = false);
   }
 
@@ -38,11 +38,12 @@ class _HomeViewState extends State<HomeView> {
     }
 
     return StreamBuilder<List<TransactionWithItems>>(
-      stream: txVm.transactions,
+      stream: txVm.transactionStream,
       builder: (context, snapshot) {
         return HomeViewBody(
           transactions: snapshot.data ?? [],
-          products: productVm.products, // ← DIJAMIN SUDAH ADA
+          products: productVm.products,
+          expenses: txVm.expenses,
         );
       },
     );

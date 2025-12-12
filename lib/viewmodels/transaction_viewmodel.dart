@@ -7,27 +7,43 @@ import '../../data/repositories/transaction_repository.dart';
 class TransactionViewModel extends ChangeNotifier {
   final TransactionRepository _repo;
 
-  TransactionViewModel(this._repo);
+  List<TransactionWithItems> transactions = [];
+  List<ExpenseData> expenses = [];
 
-  Stream<List<TransactionWithItems>> get transactions => _repo.watchAll();
+  Stream<List<TransactionWithItems>> get transactionStream =>
+      _repo.watchAllTransactions();
 
+
+  TransactionViewModel(this._repo) {
+    // Listen transaksi
+    _repo.watchAllTransactions().listen((data) {
+      transactions = data;
+      notifyListeners();
+    });
+
+    // Listen expenses
+    _repo.watchAllExpenses().listen((data) {
+      expenses = data;
+      notifyListeners();
+    });
+  }
+
+  // ====== TAMBAH TRANSACTION ======
   Future<void> addTransaction(
       double total, List<Map<String, dynamic>> items) async {
     await _repo.saveTransaction(total, items);
-    notifyListeners();
   }
 
+  // ====== TAMBAH EXPENSE ======
   Future<void> addSingleExpense(String name, int qty, double price) async {
-    // final total = qty * price;
-    //
-    // await _repo.addExpense(
-    //   name: name,
-    //   qty: qty,
-    //   price: price,
-    //   total: total,
-    //   date: DateTime.now(),
-    // );
-    //
-    // loadExpenses();
+    final total = qty * price;
+
+    await _repo.saveExpense(
+      name: name,
+      qty: qty,
+      price: price,
+      total: total,
+      date: DateTime.now(),
+    );
   }
 }

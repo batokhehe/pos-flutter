@@ -12,8 +12,8 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView>
     with SingleTickerProviderStateMixin {
-  final emailController = TextEditingController(text: 'eve.holt@reqres.in');
-  final passwordController = TextEditingController(text: 'cityslicka');
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
   late final AnimationController _animController;
   late final Animation<double> _scaleAnim;
 
@@ -63,7 +63,7 @@ class _LoginViewState extends State<LoginView>
                         : Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const FlutterLogo(size: 72),
+                              Image.asset("assets/icon/app_icon.png", width: 72,),
                               const SizedBox(height: 16),
                               Text('Welcome',
                                   style: Theme.of(context)

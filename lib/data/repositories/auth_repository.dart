@@ -7,7 +7,7 @@ class AuthRepository {
   AuthRepository(this.apiClient);
 
   Future<LoginResponse> login(String email, String password) async {
-    final response = await apiClient.post('login', {
+    final response = await apiClient.post('/login', {
       'email': email,
       'password': password,
     });

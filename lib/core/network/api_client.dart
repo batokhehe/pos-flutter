@@ -4,13 +4,9 @@ import 'package:flutter/material.dart';
 class ApiClient {
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: 'https://reqres.in/api/',
+      baseUrl: 'https://app.baksomassular.com/api',
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
-      headers: {
-        'x-api-key': 'reqres-free-v1',
-        'Content-Type': 'application/json',
-      },
     ),
   )..interceptors.add(
       LogInterceptor(

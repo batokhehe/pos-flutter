@@ -24,7 +24,7 @@ class _DashboardViewState extends State<DashboardView> {
 
   final List<String> _titles = [
     'Home',
-    'Material',
+    'Expense',
     'Product',
     'Cashier',
   ];

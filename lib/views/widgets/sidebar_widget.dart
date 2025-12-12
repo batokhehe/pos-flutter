@@ -30,13 +30,9 @@ class SidebarWidget extends StatelessWidget {
                   children: [
                     const Icon(Icons.person, color: Colors.white, size: 48),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Token:',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
                     Text(
-                      authVM.token != null
-                          ? '${authVM.token!.substring(0, authVM.token!.length > 20 ? 20 : authVM.token!.length)}...'
+                      authVM.name != null
+                          ? authVM.name!.length > 20 ? '${authVM.name!.substring(0, 20)}...' : authVM.name!
                           : 'No token',
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       textAlign: TextAlign.center,
@@ -59,7 +55,7 @@ class SidebarWidget extends StatelessWidget {
                   ),
                   ListTile(
                     leading: const Icon(Icons.category_outlined),
-                    title: const Text('Material'),
+                    title: const Text('Expense'),
                     selected: selectedIndex == 1,
                     onTap: () => onMenuTap(1),
                   ),
