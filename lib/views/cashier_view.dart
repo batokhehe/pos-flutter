@@ -67,72 +67,97 @@ class _CashierViewState extends State<CashierView> {
                         crossAxisCount: 3,
                         mainAxisSpacing: 10,
                         crossAxisSpacing: 10,
-                        childAspectRatio: 0.7,
+                        childAspectRatio: 0.8,
                       ),
                       itemCount: vm.products.length,
                       itemBuilder: (context, index) {
                         final p = vm.products[index];
                         final image =
                             'https://source.unsplash.com/400x300/?food,meal,${p.name}';
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          elevation: 2,
-                          child: InkWell(
-                            onTap: () => _addToCart(p),
+                        return GestureDetector(
+                          onTap: () => _addToCart(p),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.06),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // ==== GAMBAR ====
-                                SizedBox(
-                                  height: 110, // Tinggi gambar lebih stabil
-                                  width: double.infinity,
-                                  child: Image.network(
-                                    image,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      color: Colors.grey[300],
-                                      child:
-                                          const Icon(Icons.fastfood, size: 40),
-                                    ),
-                                  ),
-                                ),
-
-                                // ==== TEXT AREA ====
-                                Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                // IMAGE
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(16)),
+                                  child: Stack(
                                     children: [
-                                      Text(
-                                        p.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
+                                      SizedBox(
+                                        height: 120,
+                                        width: double.infinity,
+                                        child: Image.network(
+                                          image,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              Container(
+                                            color: Colors.grey[300],
+                                            child: const Icon(Icons.fastfood,
+                                                size: 40),
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        formatCurrency.format(p.price),
-                                        style: const TextStyle(
-                                            color: Colors.orange),
+
+                                      // ADD BUTTON FLOAT
+                                      Positioned(
+                                        right: 8,
+                                        bottom: 8,
+                                        child: InkWell(
+                                          onTap: () => _addToCart(p),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(6),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.green,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.add,
+                                                color: Colors.white, size: 20),
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
 
-                                // ==== ADD BUTTON ====
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.add_circle,
-                                        color: Colors.green),
-                                    onPressed: () => _addToCart(p),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 10, 10, 4),
+                                  child: Text(
+                                    p.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                                  child: Text(
+                                    formatCurrency.format(p.price),
+                                    style: const TextStyle(
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -167,25 +192,63 @@ class _CashierViewState extends State<CashierView> {
                     child: _cart.isEmpty
                         ? const Center(child: Text('No items yet'))
                         : ListView(
+                            padding: const EdgeInsets.all(8),
                             children: _cart.entries.map((entry) {
                               final p = entry.key;
                               final qty = entry.value;
-                              return ListTile(
-                                title: Text(p.name),
-                                subtitle: Text(
-                                    '${qty}x  @ ${formatCurrency.format(p.price)}'),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
+                              final subtotal = p.price * qty;
+
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
                                   children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.remove_circle,
-                                          color: Colors.red),
-                                      onPressed: () => _removeFromCart(p),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            p.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${formatCurrency.format(p.price)} x $qty',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    IconButton(
-                                      icon: const Icon(Icons.add_circle,
-                                          color: Colors.green),
-                                      onPressed: () => _addToCart(p),
+                                    Text(
+                                      formatCurrency.format(subtotal),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Column(
+                                      children: [
+                                        InkWell(
+                                          onTap: () => _addToCart(p),
+                                          child: const Icon(Icons.add_circle,
+                                              color: Colors.green),
+                                        ),
+                                        InkWell(
+                                          onTap: () => _removeFromCart(p),
+                                          child: const Icon(Icons.remove_circle,
+                                              color: Colors.red),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -194,60 +257,89 @@ class _CashierViewState extends State<CashierView> {
                           ),
                   ),
                   Container(
-                    padding: const EdgeInsets.all(12),
-                    color: Colors.white,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, -4),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
-                          'Total: ${formatCurrency.format(_totalPrice)}',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                          textAlign: TextAlign.right,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Total',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              formatCurrency.format(_totalPrice),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          onPressed: _cart.isEmpty
-                              ? null
-                              : () async {
-                                  final txItems = _cart.entries
-                                      .map((e) => {
-                                            'productId': e.key.id,
-                                            'name': e.key.name,
-                                            'quantity': e.value,
-                                            'price': e.key.price,
-                                          })
-                                      .toList();
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: _cart.isEmpty
+                                ? null
+                                : () async {
+                                    final txItems = _cart.entries
+                                        .map((e) => {
+                                              'productId': e.key.id,
+                                              'name': e.key.name,
+                                              'quantity': e.value,
+                                              'price': e.key.price,
+                                            })
+                                        .toList();
 
-                                  await context
-                                      .read<TransactionViewModel>()
-                                      .addTransaction(_totalPrice, txItems);
+                                    await context
+                                        .read<TransactionViewModel>()
+                                        .addTransaction(_totalPrice, txItems);
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: const Text(
-                                        'Checkout berhasil!',
-                                        style: TextStyle(color: Colors.white),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            const Text('Checkout berhasil!'),
+                                        backgroundColor: Colors.green,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
                                       ),
-                                      backgroundColor: Colors.green,
-                                      // 🔥 SnackBar hijau
-                                      behavior: SnackBarBehavior.floating,
-                                      // opsional: lebih modern
-                                      margin: const EdgeInsets.all(12),
-                                      // opsional: floating style
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      duration: const Duration(seconds: 2),
-                                    ),
-                                  );
+                                    );
 
-                                  setState(() => _cart.clear());
-                                },
-                          icon: const Icon(Icons.payment),
-                          label: const Text('Checkout'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
+                                    setState(() => _cart.clear());
+                                  },
+                            icon: const Icon(
+                              Icons.payment,
+                              color: Colors.white,
+                            ),
+                            label: const Text(
+                              'Checkout',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                           ),
                         ),
                       ],

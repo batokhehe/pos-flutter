@@ -24,9 +24,9 @@ class _DashboardViewState extends State<DashboardView> {
 
   final List<String> _titles = [
     'Home',
-    'Expense',
-    'Product',
-    'Cashier',
+    'Pengeluaran',
+    'Produk',
+    'Kasir',
   ];
 
   void _onMenuTap(int index) {

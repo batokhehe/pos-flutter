@@ -25,6 +25,12 @@ class _ProductViewState extends State<ProductView> {
     final vm = context.watch<ProductViewModel>();
     final nameCtrl = TextEditingController();
     final priceCtrl = TextEditingController();
+    final width = MediaQuery.of(context).size.width;
+    final crossAxisCount = width > 900
+        ? 4
+        : width > 600
+            ? 3
+            : 2;
 
     return Scaffold(
       body: Padding(
@@ -32,17 +38,17 @@ class _ProductViewState extends State<ProductView> {
         child: vm.products.isEmpty
             ? const Center(
                 child: Text(
-                  'No products yet.\nTap + to add one!',
+                  'Belum Ada Produk Terdaftar.',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16),
                 ),
               )
             : GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.72,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 1, // ⬅️ lebih pendek & rapi
                 ),
                 itemCount: vm.products.length,
                 itemBuilder: (context, index) {
@@ -53,85 +59,103 @@ class _ProductViewState extends State<ProductView> {
                   return GestureDetector(
                     onTap: () {
                       nameCtrl.text = p.name;
-                      priceCtrl.text = p.price.toString();
+                      priceCtrl.text =
+                          formatCurrency.format(p.price); // ⬅️ UBAH
                       _showProductDialog(
                           context, vm, nameCtrl, priceCtrl, p.id);
                     },
-                    child: Card(
-                      elevation: 5,
-                      shadowColor: Colors.black12,
-                      shape: RoundedRectangleBorder(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                       ),
-                      clipBehavior: Clip.antiAlias,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // ==== IMAGE ====
-                          SizedBox(
-                            height: 130,
-                            width: double.infinity,
-                            child: Image.network(
-                              dummyImage,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: Colors.grey[300],
-                                child: const Icon(
-                                  Icons.fastfood,
-                                  size: 48,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // ==== TEXT ====
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(18)),
+                            child: Stack(
                               children: [
-                                Text(
-                                  p.name,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 15,
+                                SizedBox(
+                                  height: 120,
+                                  width: double.infinity,
+                                  child: Image.network(
+                                    dummyImage,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: Colors.grey[300],
+                                      child:
+                                          const Icon(Icons.fastfood, size: 48),
+                                    ),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  formatCurrency.format(p.price),
-                                  style: const TextStyle(
-                                    color: Colors.orange,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+
+                                // PRICE BADGE
+                                Positioned(
+                                  right: 8,
+                                  top: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      formatCurrency.format(p.price),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
 
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+                            child: Text(
+                              p.name,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+
                           const Spacer(),
 
-                          // ==== DELETE BUTTON ====
+                          // DELETE BUTTON
                           Padding(
                             padding:
-                                const EdgeInsets.only(right: 10, bottom: 8),
+                                const EdgeInsets.only(right: 10, bottom: 10),
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: InkWell(
-                                borderRadius: BorderRadius.circular(50),
                                 onTap: () => vm.deleteProduct(p.id!),
+                                borderRadius: BorderRadius.circular(20),
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFFFECEC),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(0.08),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
-                                    Icons.delete,
+                                    Icons.delete_outline,
                                     color: Colors.red,
                                     size: 20,
                                   ),
@@ -146,8 +170,16 @@ class _ProductViewState extends State<ProductView> {
                 },
               ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.orange,
+        icon: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        label: const Text(
+          "Tambah Produk",
+          style: TextStyle(color: Colors.white),
+        ),
         onPressed: () => _showProductDialog(
           context,
           vm,
@@ -155,7 +187,6 @@ class _ProductViewState extends State<ProductView> {
           priceCtrl,
           null,
         ),
-        child: const Icon(Icons.add),
       ),
     );
   }
@@ -167,81 +198,126 @@ class _ProductViewState extends State<ProductView> {
     TextEditingController priceCtrl,
     int? id,
   ) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
-        return Dialog(
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: SingleChildScrollView(
-            // ✅ Biar bisa di-scroll saat keyboard muncul
-            padding: EdgeInsets.only(
-              top: 20,
-              left: 20,
-              right: 20,
-              bottom: MediaQuery.of(context).viewInsets.bottom +
-                  20, // ✅ Tambah padding sesuai tinggi keyboard
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 12,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  id != null ? "Edit Product" : "Add Product",
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // DRAG HANDLE
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: nameCtrl,
-                  decoration: const InputDecoration(labelText: 'Name'),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: priceCtrl,
-                  decoration: const InputDecoration(labelText: 'Price'),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
+
+                  Text(
+                    id != null ? "Edit Produk" : "Tambah Produk",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final name = nameCtrl.text.trim();
-                        final price =
-                            double.tryParse(priceCtrl.text.trim()) ?? 0.0;
+                  ),
 
-                        if (name.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Please enter a product name')),
-                          );
-                          return;
-                        }
+                  const SizedBox(height: 20),
 
-                        if (id == null) {
-                          await vm.addProduct(name, price);
-                        } else {
-                          await vm.updateProduct(id, name, price);
-                        }
-
-                        if (context.mounted) Navigator.pop(context);
-                      },
-                      child: const Text('Save'),
+                  // NAMA PRODUK
+                  TextField(
+                    controller: nameCtrl,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Produk',
+                      border: OutlineInputBorder(),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // HARGA
+                  TextField(
+                    controller: priceCtrl,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      ThousandsInputFormatter(),
+                    ],
+                    decoration: const InputDecoration(
+                      labelText: 'Harga',
+                      prefixText: 'Rp ',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // BUTTON
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Batal'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                          ),
+                          onPressed: () async {
+                            final name = nameCtrl.text.trim();
+                            final price = parseIntCurrency(priceCtrl.text);
+
+                            if (name.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Mohon masukkan nama produk.'),
+                                ),
+                              );
+                              return;
+                            }
+
+                            if (id == null) {
+                              await vm.addProduct(name, price.toDouble());
+                            } else {
+                              await vm.updateProduct(
+                                  id, name, price.toDouble());
+                            }
+
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                          child: const Text(
+                            'Simpan',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );

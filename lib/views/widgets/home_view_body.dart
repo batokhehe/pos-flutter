@@ -2,9 +2,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/utils/export_service.dart';
 import '../../data/models/transaction_with_items.dart';
 import '../../domain/entities/product.dart';
-import '../../core/db/app_database.dart'; // pastikan ExpenseData ada disini
+import '../../core/db/app_database.dart';
+import '../../locator.dart'; // pastikan ExpenseData ada disini
 
 class HomeViewBody extends StatefulWidget {
   final List<TransactionWithItems> transactions;
@@ -126,6 +128,34 @@ class _HomeViewBodyState extends State<HomeViewBody> {
                 _buildFilter("Monthly", "Bulanan"),
                 const SizedBox(width: 8),
                 _buildCustomFilter(),
+                const Spacer(),
+                ElevatedButton.icon(
+                  icon: const Icon(
+                    Icons.download,
+                    color: Colors.white,
+                  ),
+                  label: const Text(
+                    "Export Data",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  onPressed: () async {
+                    final exporter = ExportService(locator<AppDatabase>());
+
+                    final path = await exporter.exportAll();
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Data berhasil diexport ke:\n$path"),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
+                ),
               ],
             ),
 

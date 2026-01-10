@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
     final authVM = context.watch<AuthViewModel>();
 
     return MaterialApp(
-      title: 'MVVM Dashboard',
+      title: 'Jurnal Sular',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: '/',

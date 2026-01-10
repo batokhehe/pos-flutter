@@ -55,19 +55,19 @@ class SidebarWidget extends StatelessWidget {
                   ),
                   ListTile(
                     leading: const Icon(Icons.category_outlined),
-                    title: const Text('Expense'),
+                    title: const Text('Pengeluaran'),
                     selected: selectedIndex == 1,
                     onTap: () => onMenuTap(1),
                   ),
                   ListTile(
                     leading: const Icon(Icons.shopping_bag_outlined),
-                    title: const Text('Product'),
+                    title: const Text('Produk'),
                     selected: selectedIndex == 2,
                     onTap: () => onMenuTap(2),
                   ),
                   ListTile(
                     leading: const Icon(Icons.point_of_sale_outlined),
-                    title: const Text('Cashier'),
+                    title: const Text('Kasir'),
                     selected: selectedIndex == 3,
                     onTap: () => onMenuTap(3),
                   ),

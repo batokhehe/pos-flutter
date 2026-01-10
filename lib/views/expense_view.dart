@@ -18,14 +18,27 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
     final txVm = context.watch<TransactionViewModel>();
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F8F8),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
         onPressed: _openInputSheet,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
-      body: txVm.expenses.isEmpty
-          ? const Center(child: Text("Belum ada pengeluaran"))
-          : _buildExpenseList(txVm),
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: txVm.expenses.isEmpty
+                  ? const Center(child: Text("Belum ada pengeluaran"))
+                  : _buildExpenseList(txVm),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -36,7 +49,7 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
     final nameC = TextEditingController();
     final qtyC = TextEditingController(text: "1");
     final priceC = TextEditingController();
-    double total = 0;
+    int total = 0;
 
     showModalBottomSheet(
       context: context,
@@ -49,7 +62,7 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
           builder: (context, setSheetState) {
             void updateTotal() {
               final qty = int.tryParse(qtyC.text) ?? 0;
-              final price = double.tryParse(priceC.text) ?? 0;
+              final price = parseIntCurrency(priceC.text);
               setSheetState(() => total = qty * price);
             }
 
@@ -106,12 +119,16 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
                       TextField(
                         controller: priceC,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          ThousandsInputFormatter(),
+                        ],
                         decoration: const InputDecoration(
                           labelText: "Harga per item (Rp)",
                           border: OutlineInputBorder(),
                         ),
                         onChanged: (_) => updateTotal(),
                       ),
+
                       const SizedBox(height: 12),
 
                       // TOTAL
@@ -131,28 +148,30 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
                       // SUBMIT BUTTON
                       SizedBox(
                         width: double.infinity,
+                        height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.orange,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                           onPressed: () async {
                             final name = nameC.text.trim();
                             final qty = int.tryParse(qtyC.text) ?? 0;
-                            final price = double.tryParse(priceC.text) ?? 0;
+                            final price = parseIntCurrency(priceC.text);
 
                             if (name.isEmpty || qty <= 0 || price <= 0) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text("Isi data dengan benar"),
-                                ),
+                                    content: Text("Isi data dengan benar")),
                               );
                               return;
                             }
 
-                            // KIRIM KE DATABASE
                             await context
                                 .read<TransactionViewModel>()
-                                .addSingleExpense(name, qty, price);
+                                .addSingleExpense(name, qty, price.toDouble());
 
                             Navigator.pop(context);
 
@@ -161,7 +180,13 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
                                   content: Text("Pengeluaran disimpan")),
                             );
                           },
-                          child: const Text("SIMPAN"),
+                          child: const Text(
+                            "SIMPAN",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.white),
+                          ),
                         ),
                       ),
                     ],
@@ -175,22 +200,99 @@ class _ExpenseInputViewState extends State<ExpenseInputView> {
 
   Widget _buildExpenseList(TransactionViewModel vm) {
     return ListView.builder(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       itemCount: vm.expenses.length,
       itemBuilder: (context, index) {
         final e = vm.expenses[index];
 
-        return Card(
-          elevation: 2,
+        return Container(
           margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Text(e.name),
-            subtitle: Text(
-              "${e.qty} x ${formatCurrency.format(e.price)}\n${DateFormat('dd MMM yyyy').format(e.date)}",
-            ),
-            trailing: Text(
-              formatCurrency.format(e.total),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ICON
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.receipt_long,
+                    color: Colors.orange,
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // CONTENT
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        e.name,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "${e.qty} × ${formatCurrency.format(e.price)}",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+
+                      // DATE BADGE
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          DateFormat('dd MMM yyyy').format(e.date),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // TOTAL
+                Text(
+                  formatCurrency.format(e.total),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
             ),
           ),
         );
